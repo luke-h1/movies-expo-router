@@ -3,8 +3,7 @@
 import { AI } from "@/src/context/ai-context";
 import { useActions, useUIState } from "@ai-sdk/rsc";
 import React, { useCallback } from "react";
-import { TouchableOpacityProps } from "react-native";
-import TouchableBounce from "../ui/TouchableBounce";
+import { Pressable, TouchableOpacityProps } from "react-native";
 import { UserMessage } from "./UserMessage";
 
 export function PromptOnTap({
@@ -14,7 +13,7 @@ export function PromptOnTap({
 }: { prompt: string | [string, string] } & TouchableOpacityProps) {
   const onPressPrompt = usePromptOnPress(prompt);
   return (
-    <TouchableBounce
+    <Pressable
       {...props}
       onPress={async (e) => {
         onPress?.(e);

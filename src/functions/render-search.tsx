@@ -4,9 +4,8 @@ import * as AC from "@bacons/apple-colors";
 import { Image } from "expo-image";
 import { Link } from "expo-router";
 import React from "react";
-import { ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import { FadeIn } from "../components/ui/FadeIn";
-import TouchableBounce from "../components/ui/TouchableBounce";
 import { tmdbService } from "../services/tmdbService";
 import { TRENDING_MEDIA_FIXTURE } from "./fixtures/search.fixture";
 
@@ -38,7 +37,7 @@ const MediaCard = ({
   type: "movie" | "tv" | "person";
 }) => (
   <Link href={`/${type}/${id}`} asChild>
-    <TouchableBounce style={{ marginHorizontal: 4 }}>
+    <Pressable style={{ marginHorizontal: 4 }}>
       <View
         style={{
           width: POSTER_WIDTH,
@@ -85,7 +84,7 @@ const MediaCard = ({
           </Text>
         </View>
       </View>
-    </TouchableBounce>
+    </Pressable>
   </Link>
 );
 
@@ -101,7 +100,7 @@ const PersonCard = ({
   profilePath: string | null;
 }) => (
   <Link href={`/person/${id}`} asChild>
-    <TouchableBounce style={{ marginHorizontal: 4 }}>
+    <Pressable style={{ marginHorizontal: 4 }}>
       <View
         style={{
           width: POSTER_WIDTH,
@@ -147,7 +146,7 @@ const PersonCard = ({
           </Text>
         </View>
       </View>
-    </TouchableBounce>
+    </Pressable>
   </Link>
 );
 
@@ -327,14 +326,14 @@ function TrendingSection({ title, items }: { title: string; items: any[] }) {
             Trending {title}
           </Text>
           {/* <Link href={`/trending/${title.toLowerCase()}`} asChild>
-          <TouchableBounce>
+          <Pressable>
             <Text style={{ 
               fontSize: 16,
               color: AC.systemBlue
             }}>
               See All
             </Text>
-          </TouchableBounce>
+          </Pressable>
         </Link> */}
         </View>
 

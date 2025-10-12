@@ -10,6 +10,7 @@ import * as Haptics from "expo-haptics";
 import React, { useCallback, useRef, useState } from "react";
 import {
   NativeSyntheticEvent,
+  Pressable,
   TextInput,
   TextInputSubmitEditingEventData,
   useColorScheme,
@@ -21,7 +22,6 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { IconSymbol } from "../ui/IconSymbol";
-import TouchableBounce from "../ui/TouchableBounce";
 import { FirstSuggestions } from "./FirstSuggestions";
 import { UserMessage } from "./UserMessage";
 
@@ -202,7 +202,7 @@ function SendButton({
   onPress: () => void;
 }) {
   return (
-    <TouchableBounce
+    <Pressable
       disabled={!enabled}
       sensory
       // @ts-expect-error
@@ -234,6 +234,6 @@ function SendButton({
       >
         <IconSymbol name="arrow.up" size={20} color={AC.systemBackground} />
       </View>
-    </TouchableBounce>
+    </Pressable>
   );
 }

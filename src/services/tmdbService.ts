@@ -5,7 +5,7 @@ const tmdb = new TMDB(process.env.TMDB_READ_ACCESS_TOKEN!);
 export const tmdbService = {
   async getMovieDetails(id: string) {
     try {
-      return await tmdb.movies.details(parseInt(id));
+      return tmdb.movies.details(parseInt(id));
     } catch (error: any) {
       // Check if it's a 404 error (resource not found)
       if (error?.status_code === 34 || error?.message?.includes("not found")) {
@@ -16,7 +16,7 @@ export const tmdbService = {
 
   async getMovieVideos(id: string) {
     try {
-      return await tmdb.movies.videos(parseInt(id));
+      return tmdb.movies.videos(parseInt(id));
     } catch (error) {
       return { results: [] };
     }
@@ -24,7 +24,7 @@ export const tmdbService = {
 
   async getMovieCredits(id: string) {
     try {
-      return await tmdb.movies.credits(parseInt(id));
+      return tmdb.movies.credits(parseInt(id));
     } catch (error) {
       console.error(`Failed to fetch movie credits ${id}:`, error);
       return { cast: [], crew: [] };
@@ -33,7 +33,7 @@ export const tmdbService = {
 
   async getSimilarMovies(id: string) {
     try {
-      return await tmdb.movies.similar(parseInt(id));
+      return tmdb.movies.similar(parseInt(id));
     } catch (error) {
       return { results: [] };
     }
@@ -41,7 +41,7 @@ export const tmdbService = {
 
   async getTVDetails(id: string) {
     try {
-      return await tmdb.tvShows.details(parseInt(id));
+      return tmdb.tvShows.details(parseInt(id));
     } catch (error: any) {
       // Check if it's a 404 error (resource not found)
       if (error?.status_code === 34 || error?.message?.includes("not found")) {
@@ -53,7 +53,7 @@ export const tmdbService = {
 
   async getTVVideos(id: string) {
     try {
-      return await tmdb.tvShows.videos(parseInt(id));
+      return tmdb.tvShows.videos(parseInt(id));
     } catch (error) {
       return { results: [] };
     }
@@ -61,7 +61,7 @@ export const tmdbService = {
 
   async getTVCredits(id: string) {
     try {
-      return await tmdb.tvShows.credits(parseInt(id));
+      return tmdb.tvShows.credits(parseInt(id));
     } catch (error) {
       return { cast: [], crew: [] };
     }
@@ -69,7 +69,7 @@ export const tmdbService = {
 
   async getSimilarTV(id: string) {
     try {
-      return await tmdb.tvShows.similar(parseInt(id));
+      return tmdb.tvShows.similar(parseInt(id));
     } catch (error) {
       return { results: [] };
     }
@@ -77,7 +77,7 @@ export const tmdbService = {
 
   async getPersonDetails(id: string) {
     try {
-      return await tmdb.people.details(parseInt(id));
+      return tmdb.people.details(parseInt(id));
     } catch (error: any) {
       // Check if it's a 404 error (resource not found)
       if (error?.status_code === 34 || error?.message?.includes("not found")) {
@@ -88,7 +88,7 @@ export const tmdbService = {
 
   async getPersonCredits(id: string) {
     try {
-      return await tmdb.people.combinedCredits(parseInt(id));
+      return tmdb.people.combinedCredits(parseInt(id));
     } catch (error) {
       return { cast: [], crew: [] };
     }

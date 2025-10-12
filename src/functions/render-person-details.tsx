@@ -3,12 +3,11 @@
 import * as AC from "@bacons/apple-colors";
 import { Image } from "expo-image";
 import { Link } from "expo-router";
-import { ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import { MediaNotFound } from "../components/MediaNotFound";
 import { ParallaxImageWrapper } from "../components/ParallaxImageWrapper";
 import ShowMore from "../components/ShowMore";
 import Stack from "../components/ui/Stack";
-import TouchableBounce from "../components/ui/TouchableBounce";
 import { tmdbService } from "../services/tmdbService";
 
 export async function renderPersonDetails(id: string) {
@@ -180,21 +179,21 @@ export async function renderPersonDetails(id: string) {
             paddingHorizontal: 16,
           }}
         >
-          <TouchableBounce style={{ marginRight: 16 }}>
+          <Pressable style={{ marginRight: 16 }}>
             <Text style={{ color: AC.systemBlue }}>
               All ({allCredits.length})
             </Text>
-          </TouchableBounce>
-          <TouchableBounce style={{ marginRight: 16 }}>
+          </Pressable>
+          <Pressable style={{ marginRight: 16 }}>
             <Text style={{ color: AC.label }}>
               Acting ({actingCredits.length})
             </Text>
-          </TouchableBounce>
-          <TouchableBounce>
+          </Pressable>
+          <Pressable>
             <Text style={{ color: AC.label }}>
               Directing ({directingCredits.length})
             </Text>
-          </TouchableBounce>
+          </Pressable>
         </ScrollView>
 
         <ScrollView contentContainerStyle={{ padding: 16 }}>
@@ -214,7 +213,7 @@ export async function renderPersonDetails(id: string) {
                 }`}
                 asChild
               >
-                <TouchableBounce style={{ width: "48%", marginBottom: 16 }}>
+                <Pressable style={{ width: "48%", marginBottom: 16 }}>
                   <View
                     style={{
                       backgroundColor: AC.secondarySystemBackground,
@@ -260,7 +259,7 @@ export async function renderPersonDetails(id: string) {
                       </Text>
                     </View>
                   </View>
-                </TouchableBounce>
+                </Pressable>
               </Link>
             ))}
           </View>

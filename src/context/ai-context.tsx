@@ -15,6 +15,8 @@ if (!process.env.OPENAI_API_KEY) {
   throw new Error("OPENAI_API_KEY is required");
 }
 
+console.log(process.env.TMDB_READ_ACCESS_TOKEN);
+
 export async function onSubmit(message: string) {
   "use server";
 
@@ -56,9 +58,9 @@ For trending/popular: leave query empty and use appropriate time_window (week)
 Always be friendly and conversational. After showing results, offer to help further or suggest related searches.
 
 User info:
-- city: ${headers.get("eas-ip-city") ?? (__DEV__ ? "Austin" : "unknown")}
-- country: ${headers.get("eas-ip-country") ?? (__DEV__ ? "US" : "unknown")}
-- region: ${headers.get("eas-ip-region") ?? (__DEV__ ? "TX" : "unknown")}
+- city: ${headers.get("eas-ip-city") ?? (__DEV__ ? "London" : "unknown")}
+- country: ${headers.get("eas-ip-country") ?? (__DEV__ ? "GB" : "unknown")}
+- region: ${headers.get("eas-ip-region") ?? (__DEV__ ? "GB" : "unknown")}
 - device platform: ${headers.get("expo-platform") ?? "unknown"}
 `,
       },
@@ -160,6 +162,7 @@ User info:
               } else {
                 results = await tmdbService.searchTV(query);
               }
+              console.log("results ->", results);
             } else {
               // Get trending movies or TV shows
               if (media_type === "movie") {
