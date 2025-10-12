@@ -1,10 +1,9 @@
 "use client";
 
-import TouchableBounce from "@/src/components/ui/TouchableBounce";
 import * as AC from "@bacons/apple-colors";
 import { Image } from "expo-image";
 import { Link } from "expo-router";
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { POSTER_HEIGHT, POSTER_WIDTH } from "../constants";
 
 interface MediaCardProps {
@@ -28,7 +27,7 @@ export function MediaCard({
 
   return (
     <Link href={`/${type}/${id}`} asChild>
-      <TouchableBounce style={styles.touchable}>
+      <Pressable style={styles.touchable}>
         <View
           style={[styles.container, isHorizontal && styles.containerHorizontal]}
         >
@@ -50,7 +49,7 @@ export function MediaCard({
             <Text style={styles.rating}> ★ {rating.toFixed(1)}</Text>
           </View>
         </View>
-      </TouchableBounce>
+      </Pressable>
     </Link>
   );
 }

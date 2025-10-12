@@ -1,8 +1,7 @@
-import TouchableBounce from "@/src/components/ui/TouchableBounce";
 import * as AC from "@bacons/apple-colors";
 import { Image } from "expo-image";
 import { Link } from "expo-router";
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { POSTER_HEIGHT, POSTER_WIDTH } from "../constants";
 
 interface PersonCardProps {
@@ -20,7 +19,7 @@ export const PersonCard = ({
 }: PersonCardProps) => {
   return (
     <Link key={id} href={`/person/${id}`} asChild>
-      <TouchableBounce style={{ marginHorizontal: 4 }}>
+      <Pressable style={{ marginHorizontal: 4 }}>
         <View
           style={{
             width: POSTER_WIDTH,
@@ -72,7 +71,7 @@ export const PersonCard = ({
             </Text>
           </View>
         </View>
-      </TouchableBounce>
+      </Pressable>
     </Link>
   );
 };

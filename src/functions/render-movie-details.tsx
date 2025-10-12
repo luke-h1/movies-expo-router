@@ -5,14 +5,13 @@ import { label } from "@bacons/apple-colors";
 import { Image } from "expo-image";
 import { Link, Stack } from "expo-router";
 import React from "react";
-import { ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import { CastCard } from "../components/CastCard";
 import { CompanyCard } from "../components/CompanyCard";
 import { MediaNotFound } from "../components/MediaNotFound";
 import { ParallaxImageWrapper } from "../components/ParallaxImageWrapper";
 import { VideoCard } from "../components/VideoCard";
 import { FadeIn } from "../components/ui/FadeIn";
-import TouchableBounce from "../components/ui/TouchableBounce";
 import { tmdbService } from "../services/tmdbService";
 import {
   CREDITS_FIXTURE,
@@ -179,7 +178,7 @@ function MediaHero({ media, type }: { media: any; type: MediaType }) {
 function MediaCard({ media, type }: { media: any; type: MediaType }) {
   return (
     <Link href={`/${type}/${media.id}`} asChild>
-      <TouchableBounce style={{ marginHorizontal: 4 }}>
+      <Pressable style={{ marginHorizontal: 4 }}>
         <View style={{ width: 140 }}>
           <Image
             source={{
@@ -198,7 +197,7 @@ function MediaCard({ media, type }: { media: any; type: MediaType }) {
             ★ {media.vote_average.toFixed(1)}
           </Text>
         </View>
-      </TouchableBounce>
+      </Pressable>
     </Link>
   );
 }

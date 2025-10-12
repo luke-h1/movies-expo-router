@@ -1,0 +1,63 @@
+{
+  "expo": {
+    "name": "movies-exp-router-lho",
+    "owner": "lukehowsam123",
+    "slug": "movies-exp-router-lho",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "lhomoviesexporouter",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "extra": {
+      "eas": {
+        "projectId": "c003ab71-ea1c-446c-8d0a-ddc529f21840"
+      }
+    },
+    "ios": {
+      "bundleIdentifier": "com.lukehowsam123.lhomoviesexporouter",
+      "supportsTablet": true,
+      "infoPlist": {
+        "UIViewControllerBasedStatusBarAppearance": true,
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "com.lukehowsam123.lhomiesexporouter",
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "backgroundImage": "./assets/images/android-icon-background.png",
+        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+      },
+      "edgeToEdgeEnabled": true
+    },
+    "web": {
+      "output": "server",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-font",
+      "expo-web-browser",
+      "expo-router",
+      "@bacons/apple-colors",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff",
+          "dark": {
+            "backgroundColor": "#000000"
+          }
+        }
+      ]
+    ],
+    "experiments": {
+      "reactServerFunctions": true,
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}

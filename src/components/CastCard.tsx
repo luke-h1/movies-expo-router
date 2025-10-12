@@ -3,8 +3,7 @@
 import * as AC from "@bacons/apple-colors";
 import { Image } from "expo-image";
 import { Link } from "expo-router";
-import { Text } from "react-native";
-import TouchableBounce from "./ui/TouchableBounce.native";
+import { Pressable, Text } from "react-native";
 
 interface CastCardProps {
   person: {
@@ -18,7 +17,7 @@ interface CastCardProps {
 export function CastCard({ person }: CastCardProps) {
   return (
     <Link href={`/person/${person.id}`} asChild push>
-      <TouchableBounce style={{ width: 100, marginHorizontal: 4 }}>
+      <Pressable style={{ width: 100, marginHorizontal: 4 }}>
         <Image
           source={{
             uri: person.profile_path
@@ -52,7 +51,7 @@ export function CastCard({ person }: CastCardProps) {
         >
           {person.character}
         </Text>
-      </TouchableBounce>
+      </Pressable>
     </Link>
   );
 }
