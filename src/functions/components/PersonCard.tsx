@@ -3,7 +3,7 @@ import * as AC from "@bacons/apple-colors";
 import { Image } from "expo-image";
 import { Link } from "expo-router";
 import { Text, View } from "react-native";
-import { POSTER_HEIGHT, POSTER_WIDTH } from "../render-search";
+import { POSTER_HEIGHT, POSTER_WIDTH } from "../constants";
 
 interface PersonCardProps {
   id: number;

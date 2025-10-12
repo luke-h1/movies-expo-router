@@ -1,15 +1,9 @@
-import { Text, View } from "react-native";
+import { Redirect } from "expo-router";
 
-export default function Index() {
-  return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Text>Edit app/index.tsx to edit this screen.</Text>
-    </View>
-  );
+/**
+ * Dummy initial route that redirects to the actual main route `/(tabs)/home`
+ * @see https://github.com/expo/router/issues/428#issuecomment-1540011427
+ */
+export default function Layout() {
+  return <Redirect href="/(tabs)/search" />;
 }

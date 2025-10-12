@@ -1,3 +1,5 @@
+"use client";
+
 import { FadeIn } from "@/src/components/ui/FadeIn";
 import * as AC from "@bacons/apple-colors";
 import { ScrollView, Text, View } from "react-native";
@@ -9,9 +11,9 @@ type TrendingSectionProps = {
     id: string;
     title: string;
     name: string;
-    vote_average: string;
+    vote_average: number;
     poster_path: string;
-    type: string;
+    media_type: string;
   }[];
 };
 
@@ -51,9 +53,9 @@ export function TrendingSection({ items, title }: TrendingSectionProps) {
                 key={item.id}
                 id={item.id}
                 title={item.title || item.name}
-                rating={parseInt(item.vote_average, 10)}
+                rating={item.vote_average}
                 posterPath={item.poster_path}
-                type={title === "Movies" ? "movie" : "show"}
+                type={item.media_type as "movie" | "tv"}
               />
             ))}
         </ScrollView>
