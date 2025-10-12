@@ -61,6 +61,7 @@ export default function Tabs({
     <NativeTabs
       screenOptions={{
         ...DEFAULT_TABS,
+        popToTopOnBlur: true,
 
         ...Platform.select({
           ios: isMd

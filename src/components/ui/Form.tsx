@@ -164,7 +164,6 @@ export function HStack(props: ViewProps) {
           flexDirection: "row",
           alignItems: "center",
           gap: 8,
-          // @ts-expect-error
           wordWrap: "break-word",
           // flexWrap: "wrap",
         },
@@ -707,7 +706,7 @@ export function Section({
     }
 
     return (
-      <React.Fragment key={child.key ?? String(index)}>
+      <React.Fragment key={`section-item-${index}`}>
         {child}
         {!isLastChild && <Separator />}
       </React.Fragment>

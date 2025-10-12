@@ -98,7 +98,7 @@ export function SearchPlaceholder() {
         }
       >
         {renderTrendingMedia({
-          type: "media",
+          type: "movie",
           timeWindow: "day",
           size: numItems,
         })}
