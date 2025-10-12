@@ -40,7 +40,7 @@ export async function ShowsSection({ query }: ShowsSectionProps) {
             posterPath={show.poster_path}
             rating={show.vote_average}
             title={show.name}
-            type="show"
+            type="tv"
             key={show.id}
           />
         ))}
