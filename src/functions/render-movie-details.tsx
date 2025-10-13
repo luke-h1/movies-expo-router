@@ -1,19 +1,13 @@
 "use server";
 
-import * as AC from "@bacons/apple-colors";
+import { Image } from "@/src/components/img";
 import { label } from "@bacons/apple-colors";
-import { Image } from "expo-image";
-import { Stack } from "expo-router";
+import { Link, Stack } from "expo-router";
 import React from "react";
-import { ScrollView, Text, View } from "react-native";
-import { CastCard } from "../components/CastCard";
-import { CompanyCard } from "../components/CompanyCard";
-import { MediaCard } from "../components/MediaCard";
-import { MediaNotFound } from "../components/MediaNotFound";
-import { ParallaxImageWrapper } from "../components/ParallaxImageWrapper";
-import { VideoCard } from "../components/VideoCard";
-import { FadeIn } from "../components/ui/FadeIn";
-import { tmdbService } from "../services/tmdbService";
+import { Pressable, ScrollView, Text, View } from "react-native";
+
+import * as AC from "@bacons/apple-colors";
+import { BlurView } from "expo-blur";
 import {
   CREDITS_FIXTURE,
   MEDIA_COMPANIES_FIXTURE,
@@ -39,10 +33,6 @@ export async function renderMedia(id: string, type: MediaType = "movie") {
 
       <React.Suspense fallback={<ListSkeleton />}>
         <MediaVideos id={id} type={type} />
-      </React.Suspense>
-
-      <React.Suspense fallback={<ListSkeleton />}>
-        <MediaCast id={id} type={type} />
       </React.Suspense>
 
       <React.Suspense fallback={<ListSkeleton />}>
@@ -91,7 +81,7 @@ function MediaHero({ media, type }: { media: any; type: MediaType }) {
   return (
     <View>
       <View>
-        <ParallaxImageWrapper>
+        <>
           <Image
             source={{
               uri: `https://image.tmdb.org/t/p/w500${media.backdrop_path}`,
@@ -103,7 +93,7 @@ function MediaHero({ media, type }: { media: any; type: MediaType }) {
             }}
             transition={300}
           />
-        </ParallaxImageWrapper>
+        </>
 
         <View
           style={{
@@ -157,11 +147,9 @@ function MediaHero({ media, type }: { media: any; type: MediaType }) {
               >
                 {type === "movie" ? media.title : media.name}
               </Text>
-              {media.tagline && (
-                <Text style={{ fontSize: 15, color: label, opacity: 0.8 }}>
-                  {media.tagline}
-                </Text>
-              )}
+              <Text style={{ fontSize: 15, color: label, opacity: 0.8 }}>
+                {media.tagline}
+              </Text>
             </View>
           </View>
         </View>
@@ -176,36 +164,150 @@ function MediaHero({ media, type }: { media: any; type: MediaType }) {
   );
 }
 
-async function MediaDetails({ id, type }: { id: string; type: MediaType }) {
-  if (!id) {
-    throw new Error(`Invalid ${type} ID`);
-  }
+function VideoCard({ video }: { video: any }) {
+  return (
+    <View style={{ width: 280, marginHorizontal: 4 }}>
+      <Image
+        source={{ uri: `https://img.youtube.com/vi/${video.key}/0.jpg` }}
+        style={{ width: "100%", height: 157, borderRadius: 8 }}
+        transition={300}
+      />
+      <Text
+        style={{ fontSize: 14, color: label, marginTop: 4 }}
+        numberOfLines={1}
+      >
+        {video.name}
+      </Text>
+    </View>
+  );
+}
 
+function CastCard({ person }: { person: any }) {
+  return (
+    <Link href={`/person/${person.id}`} asChild push>
+      <Pressable style={{ width: 100, marginHorizontal: 4 }}>
+        <Image
+          source={{
+            uri: person.profile_path
+              ? `https://image.tmdb.org/t/p/w200${person.profile_path}`
+              : "https://via.placeholder.com/100x150",
+          }}
+          style={{ width: 100, height: 150, borderRadius: 8 }}
+          transition={300}
+        />
+        <Text
+          style={{ fontSize: 14, color: label, marginTop: 4 }}
+          numberOfLines={1}
+        >
+          {person.name}
+        </Text>
+        <Text
+          style={{ fontSize: 12, color: label, opacity: 0.7 }}
+          numberOfLines={1}
+        >
+          {person.character}
+        </Text>
+      </Pressable>
+    </Link>
+  );
+}
+
+function CompanyCard({ company }: { company: any }) {
+  return (
+    <View
+      style={{ alignItems: "center", marginHorizontal: 8, gap: 4, width: 100 }}
+    >
+      <BlurView
+        style={{
+          width: 100,
+          height: 100,
+          justifyContent: "center",
+          alignItems: "center",
+          borderRadius: 12,
+          overflow: "hidden",
+        }}
+        intensity={100}
+        tint="systemChromeMaterial"
+      >
+        {company.logo_path && (
+          <Image
+            source={{
+              uri: `https://image.tmdb.org/t/p/w200${company.logo_path}`,
+            }}
+            style={{ width: 80, height: 80, resizeMode: "contain" }}
+            transition={300}
+          />
+        )}
+      </BlurView>
+      <Text
+        style={{
+          fontSize: 12,
+          color: label,
+          marginTop: 4,
+          fontWeight: "600",
+        }}
+        numberOfLines={2}
+      >
+        {company.name}
+      </Text>
+    </View>
+  );
+}
+
+function MediaCard({ media, type }: { media: any; type: MediaType }) {
+  return (
+    // @ts-expect-error
+    <Link href={`/${type}/${media.id}`} asChild>
+      <Pressable style={{ marginHorizontal: 4 }}>
+        <View style={{ width: 140 }}>
+          <Image
+            source={{
+              uri: `https://image.tmdb.org/t/p/w300${media.poster_path}`,
+            }}
+            style={{ width: 140, height: 210, borderRadius: 8 }}
+            transition={300}
+          />
+          <Text
+            style={{ fontSize: 14, color: label, marginTop: 4 }}
+            numberOfLines={2}
+          >
+            {type === "movie" ? media.title : media.name}
+          </Text>
+          <Text style={{ fontSize: 12, color: label, opacity: 0.7 }}>
+            ★ {media.vote_average.toFixed(1)}
+          </Text>
+        </View>
+      </Pressable>
+    </Link>
+  );
+}
+
+async function MediaDetails({ id, type }: { id: string; type: MediaType }) {
   const media = USE_FIXTURES
     ? MEDIA_FIXTURE
-    : type === "movie"
-    ? await tmdbService.getMovieDetails(id)
-    : await tmdbService.getTVDetails(id);
+    : await fetch(`https://api.themoviedb.org/3/${type}/${id}`, {
+        headers: {
+          Authorization: `Bearer ${process.env.TMDB_READ_ACCESS_TOKEN}`,
+        },
+      }).then((res) => res.json());
 
-  // If media is not found, show error message
-  if (!media) {
-    return <MediaNotFound type={type} id={id} />;
-  }
+  // if (!response.ok) {
+  //   throw new Error(`Failed to fetch ${type}`);
+  // }
 
   return (
     <>
       <Stack.Screen
         options={{
-          // @ts-ignore
           title: type === "movie" ? media.title : media.name,
         }}
       />
 
-      <FadeIn>
+      <>
         <MediaHero media={media} type={type} />
-      </FadeIn>
+      </>
 
-      <FadeIn>
+      <>
         <View
           style={{
             backgroundColor: AC.systemGroupedBackground,
@@ -214,12 +316,12 @@ async function MediaDetails({ id, type }: { id: string; type: MediaType }) {
           }}
         >
           <Text style={{ fontSize: 16, color: label, lineHeight: 24 }}>
-            {media.overview || "No overview available."}
+            {media.overview}
           </Text>
         </View>
-      </FadeIn>
+      </>
 
-      <FadeIn>
+      <>
         <View
           style={{
             paddingBottom: 24,
@@ -246,89 +348,50 @@ async function MediaDetails({ id, type }: { id: string; type: MediaType }) {
             {[
               {
                 label: type === "movie" ? "Release Date" : "First Air Date",
-                value: (
-                  type === "movie"
-                    ? "release_date" in media
-                      ? // @ts-ignore
-                        media.release_date
-                      : "first_air_date" in media
-                      ? // @ts-ignore
-                        media.first_air_date
-                      : ""
-                    : "first_air_date" in media
-                    ? // @ts-ignore
-                      media.first_air_date
-                    : ""
-                )
-                  ? new Date(
-                      type === "movie"
-                        ? // @ts-ignore
-                          media.release_date
-                        : // @ts-ignore
-                          media.first_air_date
-                    ).toLocaleDateString()
-                  : "N/A",
+                value: new Date(
+                  type === "movie" ? media.release_date : media.first_air_date
+                ).toLocaleDateString(),
               },
               {
                 label: "Age Rating",
-                // @ts-ignore
                 value: media.adult ? "Adult" : "All Ages",
               },
               {
                 label: type === "movie" ? "Runtime" : "Episode Runtime",
                 value:
                   type === "movie"
-                    ? // @ts-ignore
-                      media.runtime
-                      ? // @ts-ignore
-                        `${media.runtime} minutes`
-                      : "N/A"
-                    : // @ts-ignore
-                    media.episode_run_time?.[0]
-                    ? // @ts-ignore
-                      `${media.episode_run_time[0]} minutes`
-                    : "N/A",
+                    ? `${media.runtime} minutes`
+                    : `${media.episode_run_time?.[0] || "N/A"} minutes`,
               },
-              ...(type === "movie"
-                ? [
-                    {
-                      label: "Budget",
-                      // @ts-ignore
-                      value: media.budget
-                        ? // @ts-ignore
-                          `$${(media.budget / 1000000).toFixed(1)}M`
-                        : "N/A",
-                    },
-                    {
-                      label: "Revenue",
-                      // @ts-ignore
-                      value: media.revenue
-                        ? // @ts-ignore
-                          `$${(media.revenue / 1000000).toFixed(1)}M`
-                        : "N/A",
-                    },
-                  ]
-                : []),
+              {
+                label: "Budget",
+                value: media.budget
+                  ? `$${(media.budget / 1000000).toFixed(1)}M`
+                  : "N/A",
+              },
+              {
+                label: "Revenue",
+                value: media.revenue
+                  ? `$${(media.revenue / 1000000).toFixed(1)}M`
+                  : "N/A",
+              },
               {
                 label: "Countries",
-                value:
-                  media.production_countries
-                    ?.map((c: { name: string }) => c.name)
-                    .join(", ") || "N/A",
+                value: media.production_countries
+                  .map((c: { name: string }) => c.name)
+                  .join(", "),
               },
               {
                 label: "Languages",
-                value:
-                  media.spoken_languages
-                    ?.map((l: { name: string }) => l.name)
-                    .join(", ") || "N/A",
+                value: media.spoken_languages
+                  .map((l: { name: string }) => l.name)
+                  .join(", "),
               },
               {
                 label: "Genres",
-                value:
-                  media.genres
-                    ?.map((g: { name: string }) => g.name)
-                    .join(", ") || "N/A",
+                value: media.genres
+                  .map((g: { name: string }) => g.name)
+                  .join(", "),
               },
             ].map((item, index, array) => (
               <View
@@ -353,7 +416,7 @@ async function MediaDetails({ id, type }: { id: string; type: MediaType }) {
             ))}
           </View>
         </View>
-      </FadeIn>
+      </>
     </>
   );
 }
@@ -361,16 +424,18 @@ async function MediaDetails({ id, type }: { id: string; type: MediaType }) {
 async function MediaVideos({ id, type }: { id: string; type: MediaType }) {
   const videos = USE_FIXTURES
     ? VIDEOS_FIXTURE
-    : type === "movie"
-    ? await tmdbService.getMovieVideos(id)
-    : await tmdbService.getTVVideos(id);
+    : await fetch(`https://api.themoviedb.org/3/${type}/${id}/videos`, {
+        headers: {
+          Authorization: `Bearer ${process.env.TMDB_READ_ACCESS_TOKEN}`,
+        },
+      }).then((res) => res.json());
 
-  if (!videos?.results || videos.results.length === 0) return null;
+  if (!videos.results.length) return null;
 
   return (
     <HorizontalList title="Teasers & Trailers">
       {videos.results.map((video: any) => (
-        <VideoCard key={video.key} videoKey={video.key} name={video.name} />
+        <VideoCard key={video.key} video={video} />
       ))}
     </HorizontalList>
   );
@@ -379,13 +444,12 @@ async function MediaVideos({ id, type }: { id: string; type: MediaType }) {
 async function MediaCast({ id, type }: { id: string; type: MediaType }) {
   const credits = USE_FIXTURES
     ? CREDITS_FIXTURE
-    : type === "movie"
-    ? await tmdbService.getMovieCredits(id)
-    : await tmdbService.getTVCredits(id);
-
-  if (!credits.cast || credits.cast.length === 0) {
-    return null;
-  }
+    : await fetch(`https://api.themoviedb.org/3/${type}/${id}/credits`, {
+        headers: {
+          Authorization: `Bearer ${process.env.TMDB_READ_ACCESS_TOKEN}`,
+        },
+      }).then((res) => res.json());
+  // console.log(JSON.stringify(credits));
 
   return (
     <HorizontalList title="Cast & Crew">
@@ -399,26 +463,16 @@ async function MediaCast({ id, type }: { id: string; type: MediaType }) {
 async function MediaCompanies({ id, type }: { id: string; type: MediaType }) {
   const media = USE_FIXTURES
     ? MEDIA_COMPANIES_FIXTURE
-    : type === "movie"
-    ? await tmdbService.getMovieDetails(id)
-    : await tmdbService.getTVDetails(id);
-
-  if (
-    !media ||
-    !media.production_companies ||
-    media.production_companies.length === 0
-  ) {
-    return <MediaNotFound type="movie" id={id} />;
-  }
+    : await fetch(`https://api.themoviedb.org/3/${type}/${id}`, {
+        headers: {
+          Authorization: `Bearer ${process.env.TMDB_READ_ACCESS_TOKEN}`,
+        },
+      }).then((res) => res.json());
 
   return (
     <HorizontalList title="Companies">
       {media.production_companies.map((company: any) => (
-        <CompanyCard
-          key={company.id}
-          logo_path={company.logo_path}
-          name={company.name}
-        />
+        <CompanyCard key={company.id} company={company} />
       ))}
     </HorizontalList>
   );
@@ -427,13 +481,11 @@ async function MediaCompanies({ id, type }: { id: string; type: MediaType }) {
 async function SimilarMedia({ id, type }: { id: string; type: MediaType }) {
   const similar = USE_FIXTURES
     ? SIMILAR_MEDIA_FIXTURE
-    : type === "movie"
-    ? await tmdbService.getSimilarMovies(id)
-    : await tmdbService.getSimilarTV(id);
-
-  if (!similar.results || similar.results.length === 0) {
-    return null;
-  }
+    : await fetch(`https://api.themoviedb.org/3/${type}/${id}/similar`, {
+        headers: {
+          Authorization: `Bearer ${process.env.TMDB_READ_ACCESS_TOKEN}`,
+        },
+      }).then((res) => res.json());
 
   return (
     <HorizontalList title="More Like This">
@@ -441,6 +493,23 @@ async function SimilarMedia({ id, type }: { id: string; type: MediaType }) {
         <MediaCard key={media.id} media={media} type={type} />
       ))}
     </HorizontalList>
+  );
+}
+
+function MovieSkeleton() {
+  return (
+    <View style={{ gap: 16 }}>
+      <View
+        style={{ height: 300, backgroundColor: "rgba(120,120,128,0.12)" }}
+      />
+      <View
+        style={{
+          height: 100,
+          backgroundColor: "rgba(120,120,128,0.12)",
+          margin: 16,
+        }}
+      />
+    </View>
   );
 }
 
