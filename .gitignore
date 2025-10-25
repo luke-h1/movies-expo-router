@@ -42,7 +42,7 @@ app-example
 /ios
 /android
 
-# .env
+.env
 
 google-services.json
 *.apk
