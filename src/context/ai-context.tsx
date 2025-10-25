@@ -8,11 +8,32 @@ import { openai } from "@ai-sdk/openai";
 import { unstable_headers } from "expo-router/rsc/headers";
 import MarkdownText from "../components/MarkdownText";
 import { MoviesCard, MoviesSkeleton } from "../components/MovieCard";
-import { tmdbService } from "../services/tmdbService";
 import { nanoid } from "../utils/nanoid";
 
 if (!process.env.OPENAI_API_KEY) {
   throw new Error("OPENAI_API_KEY is required");
+}
+
+if (!process.env.TMDB_READ_ACCESS_TOKEN) {
+  throw new Error("TMDB_READ_ACCESS_TOKEN is required");
+}
+
+const TMDB_BASE_URL = "https://api.themoviedb.org/3";
+
+// Helper function to make TMDB API calls
+async function tmdbFetch(endpoint: string) {
+  const response = await fetch(`${TMDB_BASE_URL}${endpoint}`, {
+    headers: {
+      Authorization: `Bearer ${process.env.TMDB_READ_ACCESS_TOKEN}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`TMDB API error: ${response.statusText}`);
+  }
+
+  return response.json();
 }
 
 console.log(process.env.TMDB_READ_ACCESS_TOKEN);
@@ -36,26 +57,35 @@ export async function onSubmit(message: string) {
 
   const headers = await unstable_headers();
 
-  const tools: Record<string, any> = {};
-
   const result = await streamUI({
     model: openai("gpt-4o-mini"),
     messages: [
       {
         role: "system",
         content: `\
-You are a helpful movie and TV show assistant. You help users discover movies and TV shows.
+You are a helpful movie and TV show assistant. You ONLY help with movies and TV shows.
 
-IMPORTANT: Whenever the user asks about movies or TV shows, you MUST use the get_media tool. This includes:
+IMPORTANT: If a user's message is not clearly about movies or TV shows, you MUST respond ONLY with: "I only respond to TV / movie questions."
+
+Valid movie/TV queries include:
 - Searching for specific movies or shows (e.g., "find Inception", "show me Batman movies")
 - Asking for trending/popular content (e.g., "what's trending?", "popular movies")
 - Asking for recommendations (e.g., "recommend a movie", "what should I watch?")
 - Asking about new releases (e.g., "what's new?", "latest movies")
+- Questions about actors, directors, genres, ratings, plot details
 
-For searches: provide a query parameter with the search term
-For trending/popular: leave query empty and use appropriate time_window (week)
+For valid movie/TV queries:
+- For searches: provide a query parameter with the search term
+- For trending/popular: leave query empty and use appropriate time_window (week)
 
-Always be friendly and conversational. After showing results, offer to help further or suggest related searches.
+Examples of INVALID queries that should get the rejection message:
+- "test"
+- "hello"
+- "what's the weather?"
+- "how do I cook pasta?"
+- Any question not related to movies or TV shows
+
+Always be friendly and conversational with valid queries. After showing results, offer to help further or suggest related searches.
 
 User info:
 - city: ${headers.get("eas-ip-city") ?? (__DEV__ ? "London" : "unknown")}
@@ -64,11 +94,18 @@ User info:
 - device platform: ${headers.get("expo-platform") ?? "unknown"}
 `,
       },
-      ...aiState.get().messages.map((message: any) => ({
-        role: message.role,
-        content: message.content,
-        name: message.name,
-      })),
+      ...aiState
+        .get()
+        .messages.filter(
+          (message: Message) =>
+            (message.role === "user" && typeof message.content === "string") ||
+            (message.role === "assistant" &&
+              typeof message.content === "string")
+        )
+        .map((message: Message) => ({
+          role: message.role,
+          content: message.content,
+        })),
     ],
     text: ({ content, done }) => {
       if (done) {
@@ -87,7 +124,6 @@ User info:
       return <MarkdownText done={done}>{content}</MarkdownText>;
     },
     tools: {
-      ...tools,
       get_media: {
         description:
           "Search for movies or TV shows, or get trending/popular content from TMDB. Use this for any movie or TV show related queries including searches, recommendations, trending, popular, or new releases.",
@@ -157,18 +193,27 @@ User info:
           try {
             if (query) {
               // Search for specific movies or TV shows
+              const encodedQuery = encodeURIComponent(query);
               if (media_type === "movie") {
-                results = await tmdbService.searchMovies(query);
+                const data = await tmdbFetch(
+                  `/search/movie?query=${encodedQuery}`
+                );
+                results = data.results || [];
               } else {
-                results = await tmdbService.searchTV(query);
+                const data = await tmdbFetch(
+                  `/search/tv?query=${encodedQuery}`
+                );
+                results = data.results || [];
               }
               console.log("results ->", results);
             } else {
               // Get trending movies or TV shows
               if (media_type === "movie") {
-                results = await tmdbService.getTrendingMovies(time_window);
+                const data = await tmdbFetch(`/trending/movie/${time_window}`);
+                results = data.results || [];
               } else {
-                results = await tmdbService.getTrendingTV(time_window);
+                const data = await tmdbFetch(`/trending/tv/${time_window}`);
+                results = data.results || [];
               }
             }
 

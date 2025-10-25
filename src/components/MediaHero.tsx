@@ -1,25 +1,17 @@
+"use client";
+
 import * as AC from "@bacons/apple-colors";
+import { label } from "@bacons/apple-colors";
 import { Image } from "expo-image";
 import { Text, View } from "react-native";
-import { MediaType } from "../functions/movie-details-constants";
-import { ParallaxImageWrapper } from "./ParallaxImageWrapper";
 
-interface MediaHeroProps {
-  media: {
-    backdrop_path: string;
-    poster_path: string;
-    name?: string;
-    title?: string;
-    tagline: string;
-  };
-  type: MediaType;
-}
+type MediaType = "movie" | "tv";
 
-export function MediaHero({ media, type }: MediaHeroProps) {
+export function MediaHero({ media, type }: { media: any; type: MediaType }) {
   return (
     <View>
       <View>
-        <ParallaxImageWrapper>
+        <View style={{ height: 300, overflow: "hidden" }}>
           <Image
             source={{
               uri: `https://image.tmdb.org/t/p/w500${media.backdrop_path}`,
@@ -31,7 +23,8 @@ export function MediaHero({ media, type }: MediaHeroProps) {
             }}
             transition={300}
           />
-        </ParallaxImageWrapper>
+        </View>
+
         <View
           style={{
             padding: 16,
@@ -46,12 +39,13 @@ export function MediaHero({ media, type }: MediaHeroProps) {
               right: 0,
               bottom: 0,
               top: 80,
+
               backgroundColor: AC.systemGroupedBackground,
             }}
           />
           <Image
             source={{
-              uri: `https:/image.tmdb.org/t/p/w500${media.poster_path}`,
+              uri: `https://image.tmdb.org/t/p/w500${media.poster_path}`,
             }}
             style={{
               width: 100,
@@ -61,25 +55,34 @@ export function MediaHero({ media, type }: MediaHeroProps) {
             }}
             transition={300}
           />
+
           <View
             style={{
               flex: 1,
               justifyContent: "flex-end",
             }}
           >
-            <Text
+            <View
               style={{
-                fontSize: 24,
-                fontWeight: "bold",
-                color: AC.label,
-                marginBottom: 8,
+                justifyContent: "flex-end",
               }}
             >
-              {type === "movie" ? media.title : media.name}
-            </Text>
-            <Text style={{ fontSize: 15, color: AC.label, opacity: 0.8 }}>
-              {media.tagline}
-            </Text>
+              <Text
+                style={{
+                  fontSize: 24,
+                  fontWeight: "bold",
+                  color: label,
+                  marginBottom: 8,
+                }}
+              >
+                {type === "movie" ? media.title : media.name}
+              </Text>
+              {media.tagline && (
+                <Text style={{ fontSize: 15, color: label, opacity: 0.8 }}>
+                  {media.tagline}
+                </Text>
+              )}
+            </View>
           </View>
         </View>
       </View>

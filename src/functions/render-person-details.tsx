@@ -1,19 +1,51 @@
 "use server";
 
 import * as AC from "@bacons/apple-colors";
-import { Image } from "expo-image";
-import { Link } from "expo-router";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { MediaNotFound } from "../components/MediaNotFound";
-import { ParallaxImageWrapper } from "../components/ParallaxImageWrapper";
+import { PersonCredits } from "../components/PersonCredits";
+import { PersonHero } from "../components/PersonHero";
 import ShowMore from "../components/ShowMore";
-import Stack from "../components/ui/Stack";
-import { tmdbService } from "../services/tmdbService";
 
 export async function renderPersonDetails(id: string) {
+  const TMDB_API_KEY = process.env.TMDB_READ_ACCESS_TOKEN!;
+
   const [person, credits] = await Promise.all([
-    tmdbService.getPersonDetails(id),
-    tmdbService.getPersonCredits(id),
+    // Fetch person details
+    fetch(`https://api.themoviedb.org/3/person/${id}`, {
+      headers: {
+        Authorization: `Bearer ${TMDB_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => {
+        if (!res.ok) {
+          if (res.status === 404) return null;
+          throw new Error(`Failed to fetch person details: ${res.statusText}`);
+        }
+        return res.json();
+      })
+      .catch((error) => {
+        console.error(`Failed to fetch person details ${id}:`, error);
+        return null;
+      }),
+    // Fetch person credits
+    fetch(`https://api.themoviedb.org/3/person/${id}/combined_credits`, {
+      headers: {
+        Authorization: `Bearer ${TMDB_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`Failed to fetch person credits: ${res.statusText}`);
+        }
+        return res.json();
+      })
+      .catch((error) => {
+        console.error(`Failed to fetch person credits ${id}:`, error);
+        return { cast: [], crew: [] };
+      }),
   ]);
 
   if (!person) {
@@ -36,71 +68,7 @@ export async function renderPersonDetails(id: string) {
 
   return (
     <View style={{ flex: 1 }}>
-      {/* @ts-ignore */}
-      <Stack.Screen options={{ title: person.name }} />
-      {/* hero section */}
-      <View
-        style={{
-          height: 300,
-          backgroundColor: AC.systemGray6,
-          justifyContent: "flex-end",
-          padding: 16,
-        }}
-      >
-        {/* @ts-ignore */}
-        {person.profile_path && (
-          <View
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-            }}
-          >
-            <ParallaxImageWrapper>
-              <Image
-                transition={200}
-                source={{
-                  // @ts-expect-error
-                  uri: `https://image.tmdb.org/t/p/original${person.profile_path}`,
-                }}
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                }}
-              />
-            </ParallaxImageWrapper>
-            {/* @ts-ignore */}
-            <View
-              style={{
-                // subtle transparent to black gradient at the bottom of the image
-                [process.env.EXPO_OS === "web"
-                  ? `backgroundImage`
-                  : `experimental_backgroundImage`]: `linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,0.8))`,
-
-                position: "absolute",
-                bottom: 0,
-                left: 0,
-                right: 0,
-                height: 100,
-              }}
-            />
-          </View>
-        )}
-        <Text
-          style={{
-            fontSize: 18,
-            color: "rgba(209, 209, 214, 1)",
-          }}
-        >
-          {/* @ts-ignore */}
-          {person.known_for_department}
-        </Text>
-      </View>
+      <PersonHero person={person} />
       {/* overview section */}
       <View style={{ padding: 16, backgroundColor: AC.systemBackground }}>
         <Text
@@ -170,101 +138,11 @@ export async function renderPersonDetails(id: string) {
           <ShowMore text={person.biography} />
         </View>
       </View>
-      {/* credits */}
-      <View style={{ flex: 1, marginTop: 16 }}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={{
-            paddingHorizontal: 16,
-          }}
-        >
-          <Pressable style={{ marginRight: 16 }}>
-            <Text style={{ color: AC.systemBlue }}>
-              All ({allCredits.length})
-            </Text>
-          </Pressable>
-          <Pressable style={{ marginRight: 16 }}>
-            <Text style={{ color: AC.label }}>
-              Acting ({actingCredits.length})
-            </Text>
-          </Pressable>
-          <Pressable>
-            <Text style={{ color: AC.label }}>
-              Directing ({directingCredits.length})
-            </Text>
-          </Pressable>
-        </ScrollView>
-
-        <ScrollView contentContainerStyle={{ padding: 16 }}>
-          <View
-            style={{
-              flexDirection: "row",
-              flexWrap: "wrap",
-              justifyContent: "space-between",
-            }}
-          >
-            {allCredits.map((credit: any, index: number) => (
-              <Link
-                key={credit.id + index}
-                // @ts-ignore
-                href={`/${credit.media_type as "movie" | "person" | "tv"}/${
-                  credit.id
-                }`}
-                asChild
-              >
-                <Pressable style={{ width: "48%", marginBottom: 16 }}>
-                  <View
-                    style={{
-                      backgroundColor: AC.secondarySystemBackground,
-                      borderRadius: 12,
-                      overflow: "hidden",
-                    }}
-                  >
-                    <Image
-                      transition={200}
-                      source={{
-                        // @ts-ignore
-                        uri: credit.poster_path
-                          ? `https://image.tmdb.org/t/p/w300${credit.poster_path}`
-                          : undefined,
-                      }}
-                      style={{
-                        borderRadius: 12,
-                        width: "100%",
-                        height: 200,
-                        backgroundColor: AC.systemGray5,
-                      }}
-                    />
-                    <View style={{ padding: 8 }}>
-                      <Text
-                        numberOfLines={2}
-                        style={{
-                          fontSize: 14,
-                          fontWeight: "500",
-                          color: AC.label,
-                        }}
-                      >
-                        {/* @ts-ignore */}
-                        {credit.title || credit.name}
-                      </Text>
-                      <Text
-                        style={{
-                          fontSize: 12,
-                          color: AC.secondaryLabel,
-                        }}
-                      >
-                        {/* @ts-ignore */}
-                        {credit.character || credit.job}
-                      </Text>
-                    </View>
-                  </View>
-                </Pressable>
-              </Link>
-            ))}
-          </View>
-        </ScrollView>
-      </View>
+      <PersonCredits
+        allCredits={allCredits}
+        actingCredits={actingCredits}
+        directingCredits={directingCredits}
+      />
     </View>
   );
 }

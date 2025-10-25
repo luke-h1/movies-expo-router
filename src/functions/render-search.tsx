@@ -1,17 +1,14 @@
 "use server";
 
 import * as AC from "@bacons/apple-colors";
-import { Image } from "expo-image";
-import { Link } from "expo-router";
 import React from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import { MediaCard } from "../components/MediaCard";
-import { FadeIn } from "../components/ui/FadeIn";
-import { tmdbService } from "../services/tmdbService";
+import { PersonCard } from "../components/PersonCard";
 import { TRENDING_MEDIA_FIXTURE } from "./fixtures/search.fixture";
-const POSTER_WIDTH = 140;
-const POSTER_HEIGHT = 210;
+
 const USE_FIXTURES = false;
+const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 
 export async function renderSearchContents(query: string) {
   return (
@@ -22,68 +19,6 @@ export async function renderSearchContents(query: string) {
     </View>
   );
 }
-
-const PersonCard = ({
-  id,
-  name,
-  department,
-  profilePath,
-}: {
-  id: number;
-  name: string;
-  department: string;
-  profilePath: string | null;
-}) => (
-  <Link href={`/person/${id}`} asChild>
-    <Pressable style={{ marginHorizontal: 4 }}>
-      <View
-        style={{
-          width: POSTER_WIDTH,
-          borderRadius: 12,
-          overflow: "hidden",
-        }}
-      >
-        <View
-          style={{
-            width: POSTER_WIDTH,
-            height: POSTER_HEIGHT,
-            backgroundColor: AC.systemGray5,
-            borderRadius: 12,
-          }}
-        >
-          {profilePath && (
-            <Image
-              source={{ uri: `https://image.tmdb.org/t/p/w300${profilePath}` }}
-              style={{ borderRadius: 12, width: "100%", height: "100%" }}
-              transition={200}
-            />
-          )}
-        </View>
-        <View style={{ padding: 8 }}>
-          <Text
-            numberOfLines={2}
-            style={{
-              fontSize: 14,
-              fontWeight: "500",
-              color: AC.label,
-              marginBottom: 4,
-            }}
-          >
-            {name}
-          </Text>
-          <Text
-            style={{
-              fontSize: 12,
-              color: AC.secondaryLabel,
-            }}
-          >
-            {department}
-          </Text>
-        </View>
-      </View>
-    </Pressable>
-  </Link>
-);
 
 async function MoviesSection({ query }: { query: string }) {
   const movies = await getMovies(query);
@@ -182,16 +117,78 @@ const PeopleSection = async ({ query }: { query: string }) => {
 };
 
 async function getMovies(query = "") {
-  console.log("proceess.env,", process.env.TMDB_READ_ACCESS_TOKEN);
-  return await tmdbService.searchMovies(query);
+  try {
+    const response = await fetch(
+      `${TMDB_BASE_URL}/search/movie?query=${encodeURIComponent(query)}`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.TMDB_READ_ACCESS_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      console.error("Failed to fetch movies:", response.statusText);
+      return [];
+    }
+
+    const data = await response.json();
+    return data.results || [];
+  } catch (error) {
+    console.error("Error fetching movies:", error);
+    return [];
+  }
 }
 
 async function getShows(query = "") {
-  return await tmdbService.searchTV(query);
+  try {
+    const response = await fetch(
+      `${TMDB_BASE_URL}/search/tv?query=${encodeURIComponent(query)}`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.TMDB_READ_ACCESS_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      console.error("Failed to fetch TV shows:", response.statusText);
+      return [];
+    }
+
+    const data = await response.json();
+    return data.results || [];
+  } catch (error) {
+    console.error("Error fetching TV shows:", error);
+    return [];
+  }
 }
 
 async function getPeople(query = "") {
-  return await tmdbService.searchPeople(query);
+  try {
+    const response = await fetch(
+      `${TMDB_BASE_URL}/search/person?query=${encodeURIComponent(query)}`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.TMDB_READ_ACCESS_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      console.error("Failed to fetch people:", response.statusText);
+      return [];
+    }
+
+    const data = await response.json();
+    return data.results || [];
+  } catch (error) {
+    console.error("Error fetching people:", error);
+    return [];
+  }
 }
 
 export async function renderTrendingMedia({
@@ -203,76 +200,100 @@ export async function renderTrendingMedia({
   timeWindow: "day" | "week";
   size: number;
 }) {
-  const data = USE_FIXTURES
-    ? TRENDING_MEDIA_FIXTURE
-    : type === "movie"
-    ? { results: await tmdbService.getTrendingMovies(timeWindow) }
-    : type === "tv"
-    ? { results: await tmdbService.getTrendingTV(timeWindow) }
-    : { results: await tmdbService.getTrendingAll(timeWindow) };
+  if (USE_FIXTURES) {
+    const shows = TRENDING_MEDIA_FIXTURE.results?.slice(0, size) ?? [];
+    const title =
+      type === "tv"
+        ? "TV Shows"
+        : type === "movie"
+        ? "Movies"
+        : type === "person"
+        ? "People"
+        : "Media";
+    return <TrendingSection title={title} items={shows} />;
+  }
 
-  const shows = data.results?.slice(0, size) ?? [];
+  try {
+    const response = await fetch(
+      `${TMDB_BASE_URL}/trending/${type}/${timeWindow}`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.TMDB_READ_ACCESS_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-  const title =
-    type === "tv"
-      ? "TV Shows"
-      : type === "movie"
-      ? "Movies"
-      : type === "person"
-      ? "People"
-      : "Media";
+    if (!response.ok) {
+      console.error("Failed to fetch trending media:", response.statusText);
+      return null;
+    }
 
-  return <TrendingSection title={title} items={shows} />;
+    const data = await response.json();
+    const shows = data.results?.slice(0, size) ?? [];
+
+    const title =
+      type === "tv"
+        ? "TV Shows"
+        : type === "movie"
+        ? "Movies"
+        : type === "person"
+        ? "People"
+        : "Media";
+
+    return <TrendingSection title={title} items={shows} />;
+  } catch (error) {
+    console.error("Error fetching trending media:", error);
+    return null;
+  }
 }
 
 function TrendingSection({ title, items }: { title: string; items: any[] }) {
   return (
-    <FadeIn>
-      <>
-        <View
+    <>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: 12,
+          paddingHorizontal: 16,
+        }}
+      >
+        <Text
           style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: 12,
-            paddingHorizontal: 16,
+            fontSize: 20,
+            fontWeight: "600",
+            color: AC.label,
           }}
         >
-          <Text
-            style={{
-              fontSize: 20,
-              fontWeight: "600",
-              color: AC.label,
-            }}
-          >
-            Trending {title}
+          Trending {title}
+        </Text>
+        {/* <Link href={`/trending/${title.toLowerCase()}`} asChild>
+        <Pressable>
+          <Text style={{ 
+            fontSize: 16,
+            color: AC.systemBlue
+          }}>
+            See All
           </Text>
-          {/* <Link href={`/trending/${title.toLowerCase()}`} asChild>
-          <Pressable>
-            <Text style={{ 
-              fontSize: 16,
-              color: AC.systemBlue
-            }}>
-              See All
-            </Text>
-          </Pressable>
-        </Link> */}
-        </View>
+        </Pressable>
+      </Link> */}
+      </View>
 
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 12 }}
-        >
-          {items.map((item) => (
-            <MediaCard
-              key={item.id}
-              media={item}
-              type={title === "Movies" ? "movie" : "tv"}
-            />
-          ))}
-        </ScrollView>
-      </>
-    </FadeIn>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: 12 }}
+      >
+        {items.map((item) => (
+          <MediaCard
+            key={item.id}
+            media={item}
+            type={title === "Movies" ? "movie" : "tv"}
+          />
+        ))}
+      </ScrollView>
+    </>
   );
 }
