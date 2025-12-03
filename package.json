@@ -52,7 +52,7 @@
     "react-native-svg": "^15.14.0",
     "react-native-web": "^0.20.0",
     "react-native-webview": "13.13.5",
-    "react-server-dom-webpack": "19.0.0",
+    "react-server-dom-webpack": "19.2.1",
     "tmdb-ts": "^2.0.2",
     "vaul": "^1.1.2"
   },
